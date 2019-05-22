@@ -1,0 +1,6 @@
+
+# Dump data
+sudo mysql -u root;
+use uuidcreator;
+select hex(uuid_binary) as uuid_binary, uuid_version, uuid_datetime, uuid_timestamp, uuid_clockseq, uuid_nodeid from tb_uuid into outfile '/tmp/uuidcreator.mysql.dump.csv' fields enclosed by '"' terminated by ";" escaped by '"' lines terminated by '\r\n';
+

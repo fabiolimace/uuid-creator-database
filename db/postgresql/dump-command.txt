@@ -1,0 +1,5 @@
+
+
+# Dump data
+pg_dump -a -d uuidcreator -t tb_uuid -p 5434 -U uuidcreator > uuidcreator.postgresql.db.dump.tsv
+
