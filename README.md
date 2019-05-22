@@ -4,7 +4,7 @@ This goal of this simple project was to test the [UUID Creator](https://github.c
 
 This test was done in four steps:
 
-1. Instanciate 16 threads;
+1. Instantiate 16 threads;
 2. Make each thread to generate a list of 1 million time-based UUIDs (version 1);
 3. Insert each list of 1 million UUIDs in the database;
 4. Analyse the 16 million records inserted in the database via database queries.
@@ -37,6 +37,6 @@ There's a Sqlite database in the folder `db/sqlite` that can be tested with this
 sqlite3 uuidcreator-v2019-05-21.sqlite.db
 ```
 
-This repository has almost **100 MB** because of the Sqlite database.
+This repository has **100 MB** because of the Sqlite database.
 
 // the end.
