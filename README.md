@@ -7,9 +7,9 @@ This test was done in four steps:
 1. Instantiate 16 threads;
 2. Make each thread to generate a list of 1 million time-based UUIDs (version 1);
 3. Insert each list of 1 million UUIDs in the database;
-4. Analyse the 16 million records inserted in the database via database queries.
+4. Check the 16 million records inserted in the database via database queries.
 
-The queries used to analyse the records in the database are in the directory `db`. This is the directory structure:
+The queries used to check the records in the database are in the directory `db`. This is the directory structure:
 
 ```text
 ├── [  42]  db
