@@ -47,6 +47,6 @@ The second test was done with the same steps, but only 4 threads was used, which
 
 The results are in the file `db/sqlite/queries.v2019-05-22.md`
 
-Because of the limit of 100 MB per repository, I will not commit upload the SQLite database.
+Because of the limit of 100 MB per repository, I won't upload the SQLite database.
 
 // the end.
