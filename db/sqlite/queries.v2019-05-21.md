@@ -1,28 +1,41 @@
 
--- Rows
-select count(*) from tb_uuid;
+SQLite test on 2019-05-21
+----------------------------------------------
 
+In this FIRST test 16 threads was instantiated to generate 1 million UUIDs each.
+
+#### Number of rows after inserted: 16 million
+
+```
+sqlite> select count(*) from tb_uuid;
 16000000
+```
 
--- Distinct UUIDs
-select count(distinct uuid_binary) from tb_uuid;
+#### Number of distinct UUIDs inserted: 16 million
 
+```
+sqlite> select count(distinct uuid_binary) from tb_uuid;
 16000000
+```
 
--- Distinct threads
-select count(distinct uuid_threadid) from tb_uuid;
+#### Number of theads that ran during the test: 16
 
+```
+sqlite> select count(distinct uuid_threadid) from tb_uuid;
 16
+```
 
--- Distinct clock sequences: 57
-select count(distinct uuid_clockseq) from tb_uuid;
+#### Number of distinct clock sequences used by all thread: 950
 
+```
+sqlite> select count(distinct uuid_clockseq) from tb_uuid;
 950
+```
 
--- Distinct clock sequences used by each thread: {51,49,53,57,44,54,47,54,58,58,53,48,56,55,56,53}
-select uuid_threadid, count(distinct uuid_clockseq) from tb_uuid 
-group by uuid_threadid;
+#### Number of clock sequences used by each thread: ~59 (950 / 16)
 
+```
+sqlite> select uuid_threadid, count(distinct uuid_clockseq) from tb_uuid group by uuid_threadid;
 195755345|57
 202877133|57
 203737722|59
@@ -39,10 +52,12 @@ group by uuid_threadid;
 1980656955|58
 2071827043|61
 2145640378|57
+```
 
--- Distinct counter values used by each thread: 10,000 (each)
-select uuid_threadid, count(distinct uuid_counter) from tb_uuid 
-group by uuid_threadid;
+#### Number of counter values used by each thread: 10 thousand
+
+```
+sqlite> select uuid_threadid, count(distinct uuid_counter) from tb_uuid group by uuid_threadid;
 
 195755345|10000
 202877133|10000
@@ -60,17 +75,19 @@ group by uuid_threadid;
 1980656955|10000
 2071827043|10000
 2145640378|10000
+```
 
+#### Number of clock sequences used by more than one thread: ZERO
 
--- Clock sequences used by more than one thread: 0
-select uuid_clockseq, count(distinct uuid_threadid) from tb_uuid 
-group by uuid_clockseq having count(distinct uuid_threadid) > 1;
+```
+sqlite> select uuid_clockseq, count(distinct uuid_threadid) from tb_uuid group by uuid_clockseq having count(distinct uuid_threadid) > 1;
+Empty set
+```
 
-No rows
+#### Number of UUIDs generated per thread: 1 million
 
--- UUIDs per thread
-select uuid_threadid, count(distinct uuid_binary) from tb_uuid group by uuid_threadid;
-
+```
+sqlite> select uuid_threadid, count(distinct uuid_binary) from tb_uuid group by uuid_threadid;
 195755345|1000000
 202877133|1000000
 203737722|1000000
@@ -87,25 +104,33 @@ select uuid_threadid, count(distinct uuid_binary) from tb_uuid group by uuid_thr
 1980656955|1000000
 2071827043|1000000
 2145640378|1000000
+```
 
--- Distinct counters values: 10,000
-select count(distinct uuid_counter) from tb_uuid;
+#### Number of distinct counters values used by all threads: 10 thousand
 
+```
+sqlite> select count(distinct uuid_counter) from tb_uuid;
 10000
+```
 
--- Minimum and maximum counters: 0 and 9,999
-select min(uuid_counter), max(uuid_counter) from tb_uuid;
+#### Minimum and maximum counter values: 0 and 9,999
 
+```
+sqlite> select min(uuid_counter), max(uuid_counter) from tb_uuid;
 0|9999
+```
 
--- Minimum and maximum dates: 2019-05-21 20:15:42 and 2019-05-21 20:15:46
-select min(datetime(uuid_datetime/1000, 'unixepoch')), max(datetime(uuid_datetime/1000, 'unixepoch')) from tb_uuid;
+#### Minimum and maximum date and times: 2019-05-22 01:01:03 and 2019-05-22 01:01:05 (2 seconds interval)
 
+```
+sqlite> select min(datetime(uuid_datetime/1000, 'unixepoch')), max(datetime(uuid_datetime/1000, 'unixepoch')) from tb_uuid;
 2019-05-22 01:01:03|2019-05-22 01:01:05
+```
 
--- UUIDs per clock sequence
-select uuid_clockseq, count(distinct uuid_binary) from tb_uuid group by uuid_clockseq;
+#### Number of UUIDs by each clock sequence
 
+```
+sqlite> select uuid_clockseq, count(distinct uuid_binary) from tb_uuid group by uuid_clockseq;
 384|12193
 385|14864
 386|14096
@@ -1056,5 +1081,5 @@ select uuid_clockseq, count(distinct uuid_binary) from tb_uuid group by uuid_clo
 8118|15120
 8119|15632
 8120|4266
-
+```
 

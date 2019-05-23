@@ -1,48 +1,61 @@
 
--- Rows
-select count(*) from tb_uuid;
+MySQL test on 2019-05-21
+----------------------------------------------
 
+In this FIRST test 16 threads was instantiated to generate 1 million UUIDs each.
+
+#### Number of rows after inserted: 16 million
+
+```
+select count(*) from tb_uuid;
 +----------+
 | count(*) |
 +----------+
 | 16000000 |
 +----------+
 1 row in set (9.05 sec)
+```
 
--- Distinct UUIDs
+#### Number of distinct UUIDs inserted: 16 million
+
+```
 select count(distinct uuid_binary) from tb_uuid;
-
 +-----------------------------+
 | count(distinct uuid_binary) |
 +-----------------------------+
 |                    16000000 |
 +-----------------------------+
 1 row in set (15.48 sec)
+```
 
--- Distinct threads
+#### Number of theads that ran during the test: 16
+
+```
 select count(distinct uuid_threadid) from tb_uuid;
-
 +-------------------------------+
 | count(distinct uuid_threadid) |
 +-------------------------------+
 |                            16 |
 +-------------------------------+
 1 row in set (8.82 sec)
+```
 
--- Distinct clock sequences: 57
+#### Number of distinct clock sequences used by all thread: 894
+
+```
 select count(distinct uuid_clockseq) from tb_uuid;
-
 +-------------------------------+
 | count(distinct uuid_clockseq) |
 +-------------------------------+
 |                           894 |
 +-------------------------------+
 1 row in set (9.34 sec)
+```
 
--- Distinct clock sequences used by each thread: {51,49,53,57,44,54,47,54,58,58,53,48,56,55,56,53}
-select uuid_threadid, count(distinct uuid_clockseq) from tb_uuid 
-group by uuid_threadid;
+#### Number of clock sequences used by each thread: ~55 (894 / 16)
 
+```
+select uuid_threadid, count(distinct uuid_clockseq) from tb_uuid group by uuid_threadid;
 +---------------+-------------------------------+
 | uuid_threadid | count(distinct uuid_clockseq) |
 +---------------+-------------------------------+
@@ -64,11 +77,12 @@ group by uuid_threadid;
 |    2092971889 |                            55 |
 +---------------+-------------------------------+
 16 rows in set (29.32 sec)
+```
 
--- Distinct counter values used by each thread
-select uuid_threadid, count(distinct uuid_counter) from tb_uuid 
-group by uuid_threadid;
+#### Number of counter values used by each thread: 10 thousand
 
+```
+select uuid_threadid, count(distinct uuid_counter) from tb_uuid group by uuid_threadid;
 +---------------+------------------------------+
 | uuid_threadid | count(distinct uuid_counter) |
 +---------------+------------------------------+
@@ -90,17 +104,20 @@ group by uuid_threadid;
 |    2092971889 |                        10000 |
 +---------------+------------------------------+
 16 rows in set (26.32 sec)
+```
 
+#### Number of clock sequences used by more than one thread: ZERO
 
--- Clock sequences used by more than one thread: 0
+```
 select uuid_clockseq, count(distinct uuid_threadid) from tb_uuid 
 group by uuid_clockseq having count(distinct uuid_threadid) > 1;
-
 Empty set (17.35 sec)
+```
 
--- UUIDs per thread
+#### Number of UUIDs generated per thread: 1 million
+
+```
 select uuid_threadid, count(distinct uuid_binary) from tb_uuid group by uuid_threadid;
-
 +---------------+-----------------------------+
 | uuid_threadid | count(distinct uuid_binary) |
 +---------------+-----------------------------+
@@ -122,40 +139,48 @@ select uuid_threadid, count(distinct uuid_binary) from tb_uuid group by uuid_thr
 |    2092971889 |                     1000000 |
 +---------------+-----------------------------+
 16 rows in set (46.74 sec)
+```
 
--- Distinct counters values
+#### Number of distinct counters values used by all threads: 10 thousand
+
+```
 select count(distinct uuid_counter) from tb_uuid;
-
 +------------------------------+
 | count(distinct uuid_counter) |
 +------------------------------+
 |                        10000 |
 +------------------------------+
 1 row in set (10.41 sec)
+```
 
--- Minimum and maximum counters: 0 and 9,999
+#### Minimum and maximum counter values: 0 and 9,999
+
+```
 select min(uuid_counter), max(uuid_counter) from tb_uuid;
-
 +-------------------+-------------------+
 | min(uuid_counter) | max(uuid_counter) |
 +-------------------+-------------------+
 |                 0 |              9999 |
 +-------------------+-------------------+
 1 row in set (7.79 sec)
+```
 
--- Minimum and maximum dates
+#### Minimum and maximum date and times: 2019-05-22 00:35:37 and 2019-05-22 00:35:40 (3 seconds interval)
+
+```
 select min(uuid_datetime), max(uuid_datetime) from tb_uuid;
-
 +---------------------+---------------------+
 | min(uuid_datetime)  | max(uuid_datetime)  |
 +---------------------+---------------------+
 | 2019-05-22 00:35:37 | 2019-05-22 00:35:40 |
 +---------------------+---------------------+
 1 row in set (14.43 sec)
+```
 
--- UUIDs per clock sequence
+#### Number of UUIDs by each clock sequence
+
+```
 select uuid_clockseq, count(distinct uuid_binary) from tb_uuid group by uuid_clockseq;
-
 +---------------+-----------------------------+
 | uuid_clockseq | count(distinct uuid_binary) |
 +---------------+-----------------------------+
@@ -1055,5 +1080,4 @@ select uuid_clockseq, count(distinct uuid_binary) from tb_uuid group by uuid_clo
 |         15757 |                        5271 |
 +---------------+-----------------------------+
 894 rows in set (41.57 sec)
-
-
+```
