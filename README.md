@@ -33,10 +33,20 @@ The queries used to check the records in the database are in the directory `db`.
 │       └── [ 52M]  uuidcreator.v2019-05-21.sqlite.db.7z
 ```
 
-I upoaded a SQLite database to the folder `db/sqlite` that can be tested with this command:
+I upoaded a SQLite database to the folder `db/sqlite` that can be tested with these commands:
 
 ```bash
+# Extract the database file:
+7z x uuidcreator.v2019-05-21.sqlite.db.7z
+
+# Open the database file:
 sqlite3 uuidcreator-v2019-05-21.sqlite.db
+
+# Create a view (because the uuid value is binary and the datetime is unix epoch):
+CREATE VIEW vw_uuid AS SELECT HEX(uuid_binary) AS uuid_binary, uuid_version, DATETIME(uuid_datetime / 1000, 'unixepoch') AS uuid_datetime, uuid_timestamp, uuid_clockseq, uuid_nodeid, uuid_counter, uuid_threadid FROM tb_uuid;
+
+# Execute your queries like this one:
+SELECT * FROM vw_uuid limit 10;
 ```
 
 This repository has **100 MB** because of the SQLite database.
