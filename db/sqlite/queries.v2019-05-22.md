@@ -25,7 +25,7 @@ select count(distinct uuid_threadid) from tb_uuid;
 4
 ```
 
-#### Number of distinct clock sequences used by all thread: 2628
+#### Number of distinct clock sequences used by all threads: 2628
 
 ```
 sqlite> select count(distinct uuid_clockseq) from tb_uuid;
@@ -59,7 +59,7 @@ sqlite> select uuid_clockseq, count(distinct uuid_threadid) from tb_uuid group b
 Empty set
 ```
 
-#### -- Number of UUIDs generated per thread: 10 million
+#### Number of UUIDs generated per thread: 10 million
 
 ```
 sqlite> select uuid_threadid, count(distinct uuid_binary) from tb_uuid group by uuid_threadid;
