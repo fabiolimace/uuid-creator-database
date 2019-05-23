@@ -34,7 +34,7 @@ select count(distinct uuid_threadid) from tb_uuid;
 (1 row)
 ```
 
-#### Number of distinct clock sequences used by all thread: 846
+#### Number of distinct clock sequences used by all threads: 846
 
 ```
 select count(distinct uuid_clockseq) from tb_uuid;
