@@ -40,7 +40,7 @@ I upoaded a SQLite database to the folder `db/sqlite` that can be tested with th
 7z x uuidcreator.v2019-05-21.sqlite.db.7z
 
 # Open the database file:
-sqlite3 uuidcreator-v2019-05-21.sqlite.db
+sqlite3 uuidcreator.v2019-05-21.sqlite.db
 
 # Create a view (because the uuid value is binary and the datetime is unix epoch):
 CREATE VIEW vw_uuid AS SELECT HEX(uuid_binary) AS uuid_binary, uuid_version, DATETIME(uuid_datetime / 1000, 'unixepoch') AS uuid_datetime, uuid_timestamp, uuid_clockseq, uuid_nodeid, uuid_counter, uuid_threadid FROM tb_uuid;

@@ -27,7 +27,7 @@ public class BatchInserter {
 
 	private static final int DATABASE_SQLITE = 0;
 	private static final int DATABASE_POSTGRESQL = 1;
-	private static final int DATABASE_MYSQL = 2; // Not tested
+	private static final int DATABASE_MYSQL = 2;
 
 	private static final String URL_SQLITE = "jdbc:sqlite:db/sqlite/uuidcreator.sqlite.db";
 	private static final String URL_POSTGRESQL = "jdbc:postgresql://localhost:port/uuidcreator";
@@ -312,7 +312,7 @@ public class BatchInserter {
 			try {
 				thread.join();
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Thread.currentThread().interrupt();
 			}
 		}
 
@@ -329,19 +329,14 @@ public class BatchInserter {
 		batch.batchInsert(batch, UuidVersion.TIME_BASED, threadCount, loopMax);
 		batch.closeConnection();
 
-		// BatchInserter batch = new BatchInserter(DATABASE_POSTGRESQL,
-		// "uuidcreator", "123456", 5432);
-		// batch.openConnection();
-		// batch.batchInsert(batch, UuidVersion.TIME_BASED, threadCount,
-		// loopMax);
-		// batch.closeConnection();
+//		BatchInserter batch = new BatchInserter(DATABASE_POSTGRESQL, "uuidcreator", "123456", 5432);
+//		batch.openConnection();
+//		batch.batchInsert(batch, UuidVersion.TIME_BASED, threadCount, loopMax);
+//		batch.closeConnection();
 
-		// BatchInserter batch = new BatchInserter(DATABASE_MYSQL,
-		// "uuidcreator", "123456", 3306);
-		// batch.openConnection();
-		// batch.batchInsert(batch, UuidVersion.TIME_BASED, threadCount,
-		// loopMax);
-		// batch.closeConnection();
-
+//		BatchInserter batch = new BatchInserter(DATABASE_MYSQL, "uuidcreator", "123456", 3306);
+//		batch.openConnection();
+//		batch.batchInsert(batch, UuidVersion.TIME_BASED, threadCount, loopMax);
+//		batch.closeConnection();
 	}
 }
