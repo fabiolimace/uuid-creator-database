@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.github.f4b6a3.uuid.enums.UuidVersion;
+import com.github.f4b6a3.uuid.exception.UuidCreatorException;
 import com.github.f4b6a3.uuid.factory.abst.NoArgumentsUuidCreator;
 import com.github.f4b6a3.uuid.util.UuidUtil;
 
@@ -28,7 +29,7 @@ public class BatchInserter {
 	private static final int DATABASE_POSTGRESQL = 1;
 	private static final int DATABASE_MYSQL = 2; // Not tested
 
-	private static final String URL_SQLITE = "jdbc:sqlite:db/sqlite/uuidcreator.sqlite.db"; 
+	private static final String URL_SQLITE = "jdbc:sqlite:db/sqlite/uuidcreator.sqlite.db";
 	private static final String URL_POSTGRESQL = "jdbc:postgresql://localhost:port/uuidcreator";
 	private static final String URL_MYSQL = "jdbc:mysql://localhost:port/uuidcreator";
 
@@ -217,6 +218,7 @@ public class BatchInserter {
 		private BatchInserter batch;
 		private int loopMax;
 		private int threadNumber;
+		private int threadId;
 		private List<UUID> list = new ArrayList<>();
 
 		public InsertThread(BatchInserter batch, NoArgumentsUuidCreator creator, int loopMax, int threadNumber) {
@@ -229,25 +231,38 @@ public class BatchInserter {
 		@Override
 		public void run() {
 
-			int threadId = this.hashCode();
+			threadId = this.hashCode();
 
 			System.out.println(String.format(Instant.now() + " Thread %02d: started", threadNumber));
 			for (int i = 0; i < loopMax; i++) {
 				double progress = (i * 1.0 / loopMax) * 100;
 				if (progress % 1 == 0) {
-					System.out.println(String.format(Instant.now() + " Thread %02d generating: %02d%%", threadNumber, (int) progress));
+					System.out.println(String.format(Instant.now() + " Thread %02d progress: %02d%%", threadNumber, (int) progress));
 				}
-				list.add(creator.create());
+				try {
+					UUID uuid = creator.create();
+					list.add(uuid);
+				} catch (UuidCreatorException e) {
+					// Try again if an exception occurs
+					UUID uuid = creator.create();
+					list.add(uuid);
+				}
 			}
+			
+			flush();
+			System.out.println(String.format(Instant.now() + " Thread %02d: finished", threadNumber));
+		}
 
-			for (int i = 0; i < loopMax; i++) {
-				double progress = (i * 1.0 / loopMax) * 100;
+		public void flush() {
+			for (int i = 0; i < list.size(); i++) {
+				double progress = (i * 1.0 / list.size()) * 100;
 				if (progress % 1 == 0) {
-					System.out.println(String.format(Instant.now() + " Thread %02d inserting: %02d%%", threadNumber, (int) progress));
+					System.out.println(
+							String.format(Instant.now() + " Thread %02d insert: %02d%%", threadNumber, (int) progress));
 				}
 				batch.insert(list.get(i), threadId);
 			}
-			System.out.println(String.format(Instant.now() + " Thread %02d: finished", threadNumber));
+			list.clear();
 		}
 	}
 
@@ -306,23 +321,27 @@ public class BatchInserter {
 
 	public static void main(String[] args) {
 
-		int threadCount = 4;
-		int loopMax = 10_000_000;
+		int threadCount = 16;
+		int loopMax = 1_000_000;
 
 		BatchInserter batch = new BatchInserter(DATABASE_SQLITE);
 		batch.openConnection();
 		batch.batchInsert(batch, UuidVersion.TIME_BASED, threadCount, loopMax);
 		batch.closeConnection();
-		
-//		BatchInserter batch = new BatchInserter(DATABASE_POSTGRESQL, "uuidcreator", "123456", 5434);
-//		batch.openConnection();
-//		batch.batchInsert(batch, UuidVersion.TIME_BASED, threadCount, loopMax);
-//		batch.closeConnection();
 
-//		BatchInserter batch = new BatchInserter(DATABASE_MYSQL, "uuidcreator", "123456", 3306);
-//		batch.openConnection();
-//		batch.batchInsert(batch, UuidVersion.TIME_BASED, threadCount, loopMax);
-//		batch.closeConnection();
-		
+		// BatchInserter batch = new BatchInserter(DATABASE_POSTGRESQL,
+		// "uuidcreator", "123456", 5432);
+		// batch.openConnection();
+		// batch.batchInsert(batch, UuidVersion.TIME_BASED, threadCount,
+		// loopMax);
+		// batch.closeConnection();
+
+		// BatchInserter batch = new BatchInserter(DATABASE_MYSQL,
+		// "uuidcreator", "123456", 3306);
+		// batch.openConnection();
+		// batch.batchInsert(batch, UuidVersion.TIME_BASED, threadCount,
+		// loopMax);
+		// batch.closeConnection();
+
 	}
 }
