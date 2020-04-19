@@ -1,4 +1,4 @@
-package com.github.f4b6a3.uuid;
+package com.github.f4b6a3.uuid.db;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

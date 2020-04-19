@@ -1,4 +1,4 @@
-package com.github.f4b6a3.uuid;
+package com.github.f4b6a3.uuid.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+import com.github.f4b6a3.uuid.creator.NoArgumentsUuidCreator;
 import com.github.f4b6a3.uuid.exception.UuidCreatorException;
-import com.github.f4b6a3.uuid.factory.abst.NoArgumentsUuidCreator;
+import com.github.f4b6a3.uuid.util.UuidConverter;
 import com.github.f4b6a3.uuid.util.UuidUtil;
 
 public class BatchInserter {
@@ -35,11 +37,10 @@ public class BatchInserter {
 	private static final int PORT_POSTGRESQL = 5432;
 	private static final int PORT_MYSQL = 3306;
 
-	private static final int TYPE_SEQUENTIAL = 0;
-	private static final int TYPE_TIMEBASED = 1;
-	private static final int TYPE_RANDOM = 4;
+	private static final int TYPE_TIME_BASED = 1;
+	private static final int TYPE_TIME_ORDERED = 6;
+	private static final int TYPE_RANDOM_BASED = 4;
 	private static final int TYPE_COMB = 10;
-	private static final int TYPE_ULID = 11;
 
 	public BatchInserter(int database, String user, String password, int port) {
 		this.database = database;
@@ -151,14 +152,14 @@ public class BatchInserter {
 
 	public void insert(UUID uuid, int threadId, int type) {
 
-		byte[] bytes = UuidUtil.fromUuidToBytes(uuid);
+		byte[] bytes = UuidConverter.toBytes(uuid);
 		int version = uuid.version();
 		Timestamp datetime = null;
 		long timestamp = 0;
 		long clockseq = 0;
 		long nodeid = 0;
 
-		if (type == TYPE_TIMEBASED || type == TYPE_SEQUENTIAL) {
+		if (type == TYPE_TIME_BASED || type == TYPE_TIME_ORDERED) {
 			datetime = Timestamp.from(UuidUtil.extractInstant(uuid));
 			timestamp = UuidUtil.extractTimestamp(uuid);
 			clockseq = UuidUtil.extractClockSequence(uuid);
@@ -289,18 +290,16 @@ public class BatchInserter {
 	protected NoArgumentsUuidCreator getNoArgumentsUuidCreator(int type) {
 		NoArgumentsUuidCreator creator;
 
-		if (type == TYPE_SEQUENTIAL) {
-			creator = UuidCreator.getSequentialCreator();
-		} else if (type == TYPE_TIMEBASED) {
+		if (type == TYPE_TIME_ORDERED) {
+			creator = UuidCreator.getTimeOrderedCreator();
+		} else if (type == TYPE_TIME_BASED) {
 			creator = UuidCreator.getTimeBasedCreator();
-		} else if (type == TYPE_RANDOM) {
-			creator = UuidCreator.getRandomCreator();
+		} else if (type == TYPE_RANDOM_BASED) {
+			creator = UuidCreator.getRandomBasedCreator();
 		} else if (type == TYPE_COMB) {
 			creator = UuidCreator.getCombCreator();
-		} else if (type == TYPE_ULID) {
-			creator = UuidCreator.getUlidBasedCreator();
 		} else {
-			creator = UuidCreator.getFastRandomCreator();
+			creator = UuidCreator.getRandomBasedCreator().withFastRandomGenerator();
 		}
 		return creator;
 	}
@@ -336,7 +335,7 @@ public class BatchInserter {
 		int threadCount = 16;
 		int loopMax = 1_000_000;
 		BatchInserter batch = null;
-		int type = TYPE_TIMEBASED;
+		int type = TYPE_TIME_BASED;
 		String user = "uuidcreator";
 		String pass = "123456";
 
