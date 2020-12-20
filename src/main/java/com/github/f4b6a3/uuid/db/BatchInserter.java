@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.UUID;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import com.github.f4b6a3.uuid.codec.BinaryCodec;
+import com.github.f4b6a3.uuid.codec.UuidCodec;
 import com.github.f4b6a3.uuid.creator.NoArgumentsUuidCreator;
-import com.github.f4b6a3.uuid.exception.UuidCreatorException;
-import com.github.f4b6a3.uuid.util.UuidConverter;
 import com.github.f4b6a3.uuid.util.UuidUtil;
 
 public class BatchInserter {
@@ -152,7 +152,8 @@ public class BatchInserter {
 
 	public void insert(UUID uuid, int threadId, int type) {
 
-		byte[] bytes = UuidConverter.toBytes(uuid);
+		UuidCodec<byte[]> codec = new BinaryCodec(); 
+		byte[] bytes = codec.encode(uuid);
 		int version = uuid.version();
 		Timestamp datetime = null;
 		long timestamp = 0;
@@ -248,14 +249,8 @@ public class BatchInserter {
 					System.out.println(String.format(Instant.now() + " Thread %02d progress: %02d%%", threadNumber,
 							(int) progress));
 				}
-				try {
-					UUID uuid = creator.create();
-					list.add(uuid);
-				} catch (UuidCreatorException e) {
-					// Try again if an exception occurs
-					UUID uuid = creator.create();
-					list.add(uuid);
-				}
+				UUID uuid = creator.create();
+				list.add(uuid);
 			}
 
 			flush();
@@ -297,9 +292,9 @@ public class BatchInserter {
 		} else if (type == TYPE_RANDOM_BASED) {
 			creator = UuidCreator.getRandomBasedCreator();
 		} else if (type == TYPE_COMB) {
-			creator = UuidCreator.getCombCreator();
+			creator = UuidCreator.getSuffixCombCreator();
 		} else {
-			creator = UuidCreator.getRandomBasedCreator().withFastRandomGenerator();
+			creator = UuidCreator.getRandomBasedCreator();
 		}
 		return creator;
 	}
@@ -332,10 +327,10 @@ public class BatchInserter {
 
 	public static void main(String[] args) {
 
-		int threadCount = 16;
+		int threadCount = 32;
 		int loopMax = 1_000_000;
 		BatchInserter batch = null;
-		int type = TYPE_TIME_BASED;
+		int type = TYPE_TIME_ORDERED;
 		String user = "uuidcreator";
 		String pass = "123456";
 
